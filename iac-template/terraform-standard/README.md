@@ -78,7 +78,17 @@ This creates:
 
 PAY_PER_REQUEST billing mode Compatible with Terraform backend locking
 
-## 4. Use in Terraform Backend
+## 4. Bootstrap IAM Role
+
+```
+cd bootstrap-iam
+terraform init
+terraform apply \
+  -var="account_name=dev" \
+  -var="role_name=TerraformDeployRole-Dev"
+```
+
+## 5. Use in Terraform Backend
 
 After both bootstrap steps are completed:
 
@@ -91,7 +101,6 @@ terraform {
     dynamodb_table = "terraform-locks"
   }
 }
-
 
 Then run:
 

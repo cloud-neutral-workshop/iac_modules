@@ -1,0 +1,20 @@
+account_id: "730335654753"   # 目前单账号
+name: dev
+environment: dev
+
+region: ap-northeast-1
+
+role_to_assume: arn:aws:iam::730335654753:role/TerraformDeployRole-Dev
+
+logging_bucket: org-dev-logs
+shared_vpc_account: "730335654753"   # 单账号，所以保持一致
+
+tags:
+  Environment: dev
+  Owner: Platform
+  CostCenter: "DEV"
+
+backend:
+  bucket: svc-plus-iac-state
+  key_prefix: dev/
+  dynamodb_table: svc-plus-iac-state-dynamodb-lock
