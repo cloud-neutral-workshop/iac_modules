@@ -10,7 +10,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "ap-northeast-1"
+  region = local.account.region
 
   assume_role {
     role_arn     = "arn:aws:iam::730335654753:role/TerraformDeployRole-Dev"

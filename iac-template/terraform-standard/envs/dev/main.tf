@@ -4,8 +4,23 @@ locals {
   )
 }
 
-# 第一个正式 module：iam
-module "iam" {
-  source  = "../../modules/iam"
-  account = local.account   # << 唯一需要传入 module 的变量
+
+data "aws_iam_policy_document" "dev_assume" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${local.account.account_id}:root"]
+    }
+  }
+}
+
+module "dev_role" {
+  source = "../../modules/iam"
+
+  name               = "dev-app-role"
+  assume_role_policy = data.aws_iam_policy_document.dev_assume.json
+
+  tags = local.account.tags
 }

@@ -1,18 +1,13 @@
 resource "aws_iam_role" "this" {
-  name = var.role_name
-
-  assume_role_policy = data.aws_iam_policy_document.assume.json
-
-  tags = var.tags
+  name               = var.name
+  assume_role_policy = var.assume_role_policy
+  tags               = var.tags
 }
 
-data "aws_iam_policy_document" "assume" {
-  statement {
-    actions = ["sts:AssumeRole"]
+# 附加多个 AWS managed policies
+resource "aws_iam_role_policy_attachment" "managed" {
+  for_each = toset(var.managed_policy_arns)
 
-    principals {
-      type        = "AWS"
-      identifiers = ["*"] # 你可以未来改为 OIDC provider 等
-    }
-  }
+  role       = aws_iam_role.this.name
+  policy_arn = each.value
 }
