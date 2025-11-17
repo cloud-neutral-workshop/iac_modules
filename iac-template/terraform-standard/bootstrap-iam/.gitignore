@@ -18,6 +18,7 @@ terraform.tfstate.backup
 .aws/
 credentials
 config
+.bootstrap.env
 
 # OS-specific
 .DS_Store

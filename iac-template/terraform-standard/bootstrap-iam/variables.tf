@@ -13,9 +13,7 @@ variable "role_name" {
   description = "IAM role name to create (e.g., TerraformDeployRole-Dev)"
 }
 
-locals {
-  account = yamldecode(
-    file("${path.root}/../config/accounts/${var.account_name}.yaml")
-  )
+variable "terraform_user_name" {
+  type        = string
+  description = "IAM username for Terraform IAC runner"
 }
-
