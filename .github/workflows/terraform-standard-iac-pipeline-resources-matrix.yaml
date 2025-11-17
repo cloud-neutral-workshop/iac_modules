@@ -1,11 +1,11 @@
-name: Terraform Standard - IAC Pipeline (Account/VPC Matrix)
+name: Terraform Standard - IAC Pipeline (Resources Matrix)
 
 on:
   push:
     paths:
-      - 'iac-template/terraform-standard/envs/dev-vpc/**'
-      - 'iac-template/terraform-standard/envs/dev-role/**'
-      - '.github/workflows/terraform-standard-iac-pipeline-account-matrix.yaml'
+      - 'iac-template/terraform-standard/envs/dev-object/**'
+      - 'iac-template/terraform-standard/envs/dev-ec2/**'
+      - '.github/workflows/terraform-standard-iac-pipeline-resources-matrix.yaml'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -27,8 +27,8 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - dev-vpc
-          - dev-role
+          - dev-object
+          - dev-ec2
 
     steps:
       - uses: actions/checkout@v4
