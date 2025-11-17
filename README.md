@@ -24,7 +24,7 @@ CloudNativeSuite 是一个以 **Cloud-Neutral（云中立）** 为核心理念�
 |--------|-------------|
 | **Modern-Container-Application-Reference-Architecture** | 云中立架构示例，构建多云/混合环境的现代应用参考体系 |
 | **XControl** | X 系列工具的统一 Demo 控制台 |
-| **XStream** | 面向开发者的智能网络加速器，支持 Reality / Xray-core |
+| **XStream** | 面向开发者的智能网络加速器 |
 | **XScopeHub** | 基于 OpenTelemetry 的可观测性与 AI-Ops 分析平台 |
 | **XCloudFlow** | 多云 GitOps 资源编排与自动部署引擎 |
 
@@ -101,7 +101,7 @@ The platform consists of five core projects:
 |--------|-------------|
 | **Modern-Container-Application-Reference-Architecture** | Reference architecture for cloud-neutral multi-cloud application stacks |
 | **XControl** | Unified demo & control plane for all X-Series tools |
-| **XStream** | Developer network accelerator with Reality/Xray-core |
+| **XStream** | Developer network accelerator |
 | **XScopeHub** | Observability suite powered by OpenTelemetry and AI-Ops analytics |
 | **XCloudFlow** | Multi-cloud GitOps orchestrator for automated deployment pipelines |
 
