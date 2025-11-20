@@ -3,8 +3,8 @@ name: Terraform Standard - IAC Pipeline (Resources Matrix)
 on:
   push:
     paths:
-      - 'iac-template/terraform-standard/envs/dev-object/**'
-      - 'iac-template/terraform-standard/envs/dev-ec2/**'
+      - 'iac-template/terraform-hcl-standard/aws-cloud/envs/dev-object/**'
+      - 'iac-template/terraform-hcl-standard/aws-cloud/envs/dev-ec2/**'
       - '.github/workflows/terraform-standard-iac-pipeline-resources-matrix.yaml'
   workflow_dispatch:
     inputs:
@@ -14,7 +14,7 @@ on:
         default: 'true'
 
 env:
-  BASE_DIR: iac-template/terraform-standard/envs
+  BASE_DIR: iac-template/terraform-hcl-standard/aws-cloud/envs
   AWS_REGION: ap-northeast-1
   DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
 

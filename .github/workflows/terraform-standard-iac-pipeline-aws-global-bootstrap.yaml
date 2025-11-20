@@ -3,7 +3,9 @@ name: Terraform Standard - AWS Account Bootstrap
 on:
   push:
     paths:
-      - 'iac-template/terraform-standard/**'
+      - 'iac-template/terraform-hcl-standard/aws-cloud/bootstrap-s3/**'
+      - 'iac-template/terraform-hcl-standard/aws-cloud/bootstrap-iam/**'
+      - 'iac-template/terraform-hcl-standard/aws-cloud/bootstrap-dynamodb/**'
       - '.github/workflows/terraform-standard-iac-pipeline-aws-global-bootstrap.yaml'
   pull_request:
   workflow_dispatch:
@@ -18,7 +20,7 @@ on:
         default: 'true'
 
 env:
-  TF_WORKDIR: iac-template/terraform-standard
+  TF_WORKDIR: iac-template/terraform-hcl-standard/aws-cloud
   DRY_RUN: ${{ github.event.inputs.deploy_dry_run || 'true' }}
 
 jobs:

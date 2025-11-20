@@ -3,7 +3,7 @@ name: Terraform Standard - AWS Global LandingZone Baseline
 on:
   push:
     paths:
-      - 'iac-template/terraform-standard/**'
+      - 'iac-template/terraform-hcl-standard/aws-cloud/**'
       - '.github/workflows/terraform-standard-iac-pipeline-aws-global-landingzone-baseline.yaml'
   pull_request:
     branches: [main]
@@ -12,7 +12,7 @@ on:
       deploy_action:
         description: "Deployment action"
         type: choice
-        options: [init, plan, apply, destroy]
+        options: [plan, apply, destroy]
         default: plan
       deploy_dry_run:
         description: "Dry-run mode"
@@ -21,9 +21,8 @@ on:
         default: 'true'
 
 env:
-  TF_WORKDIR: iac-template/terraform-standard
+  TF_WORKDIR: iac-template/terraform-hcl-standard/aws-cloud
   DEPLOY_ACTION: ${{ github.event.inputs.deploy_action || 'plan' }}
-  DEPLOY_DRY_RUN: ${{ github.event.inputs.deploy_dry_run || 'true' }}
 
   # -------------------------------
   # SMTP settings (明文可接受)
@@ -62,6 +61,7 @@ jobs:
 
       - name: Terraform Plan (LandingZone)
         id: tfplan
+        if: env.DEPLOY_ACTION == 'plan'
         working-directory: ${{ env.TF_WORKDIR }}/envs/dev-landingzone
         run: terraform plan -no-color > plan_output.txt
 
@@ -72,7 +72,7 @@ jobs:
           path: ${{ env.TF_WORKDIR }}/envs/dev-landingzone/plan_output.txt
 
       - name: Terraform Apply (LandingZone)
-        if: env.DEPLOY_DRY_RUN == 'false'
+        if: env.DEPLOY_ACTION == 'apply'
         working-directory: ${{ env.TF_WORKDIR }}/envs/dev-landingzone
         run: terraform apply -auto-approve
 

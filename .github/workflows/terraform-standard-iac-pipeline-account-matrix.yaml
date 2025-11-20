@@ -3,8 +3,8 @@ name: Terraform Standard - IAC Pipeline (Account/VPC Matrix)
 on:
   push:
     paths:
-      - 'iac-template/terraform-standard/envs/dev-vpc/**'
-      - 'iac-template/terraform-standard/envs/dev-role/**'
+      - 'iac-template/terraform-hcl-standard/aws-cloud/envs/dev-vpc/**'
+      - 'iac-template/terraform-hcl-standard/aws-cloud/envs/dev-role/**'
       - '.github/workflows/terraform-standard-iac-pipeline-account-matrix.yaml'
   workflow_dispatch:
     inputs:
@@ -14,7 +14,7 @@ on:
         default: 'true'
 
 env:
-  BASE_DIR: iac-template/terraform-standard/envs
+  BASE_DIR: iac-template/terraform-hcl-standard/aws-cloud/envs
   AWS_REGION: ap-northeast-1
   DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
 
