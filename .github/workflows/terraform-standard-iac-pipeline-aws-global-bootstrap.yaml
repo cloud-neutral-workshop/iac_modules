@@ -70,13 +70,15 @@ jobs:
           python -m pip install --quiet pyyaml
           python - <<'PY'
           import yaml
+          import os
           from pathlib import Path
 
           cfg_path = Path("iac-template/terraform-hcl-standard/aws-cloud/config/accounts/bootstrap.yaml")
           cfg = yaml.safe_load(cfg_path.read_text())
 
-          with open("$GITHUB_ENV", "a", encoding="utf-8") as fh:
-            fh.write(f"BOOTSTRAP_BUCKET={cfg['state']['bucket_name']}\n")
+          env_path = Path(os.environ["GITHUB_ENV"])
+          current_env = env_path.read_text() if env_path.exists() else ""
+          env_path.write_text(current_env + f"BOOTSTRAP_BUCKET={cfg['state']['bucket_name']}\n")
           PY
 
       - name: Empty bootstrap S3 bucket (per config)
