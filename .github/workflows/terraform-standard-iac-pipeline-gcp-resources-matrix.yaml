@@ -1,0 +1,77 @@
+name: Terraform Standard - IAC Pipeline (GCP Resources Matrix)
+
+on:
+  push:
+    paths:
+      - 'iac-template/terraform-hcl-standard/gcp-cloud/envs/dev-object/**'
+      - 'iac-template/terraform-hcl-standard/gcp-cloud/envs/dev-ec2/**'
+      - '.github/workflows/terraform-standard-iac-pipeline-gcp-resources-matrix.yaml'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        type: choice
+        options: ['true', 'false']
+        default: 'true'
+
+env:
+  BASE_DIR: iac-template/terraform-hcl-standard/gcp-cloud/envs
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
+
+jobs:
+  terraform:
+    name: "${{ matrix.env }} :: pipeline (dry_run=${{ inputs.dry_run }})"
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        env:
+          - dev-object
+          - dev-ec2
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.51.0
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          export_environment_variables: true
+          create_credentials_file: true
+
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Init
+        working-directory: ${{ env.BASE_DIR }}/${{ matrix.env }}
+        run: make init
+
+      - name: Plan
+        working-directory: ${{ env.BASE_DIR }}/${{ matrix.env }}
+        run: make plan
+
+      - name: Apply
+        working-directory: ${{ env.BASE_DIR }}/${{ matrix.env }}
+        if: ${{ env.DRY_RUN == 'false' }}
+        run: make apply
+
+      - name: Skip Apply (dry-run)
+        if: ${{ env.DRY_RUN == 'true' }}
+        run: echo "Dry run enabled → skip apply step."
+
+      - name: Output
+        working-directory: ${{ env.BASE_DIR }}/${{ matrix.env }}
+        if: ${{ env.DRY_RUN == 'false' }}
+        run: terraform output -json

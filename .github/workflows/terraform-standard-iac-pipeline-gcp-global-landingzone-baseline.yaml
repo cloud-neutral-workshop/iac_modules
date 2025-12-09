@@ -1,0 +1,121 @@
+name: Terraform Standard - GCP Global LandingZone Baseline
+
+on:
+  push:
+    paths:
+      - 'iac-template/terraform-hcl-standard/gcp-cloud/**'
+      - '.github/workflows/terraform-standard-iac-pipeline-gcp-global-landingzone-baseline.yaml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_action:
+        description: "Deployment action"
+        type: choice
+        options: [plan, apply, destroy]
+        default: plan
+      deploy_dry_run:
+        description: "Dry-run mode"
+        type: choice
+        options: ['true', 'false']
+        default: 'true'
+
+env:
+  TF_WORKDIR: iac-template/terraform-hcl-standard/gcp-cloud
+  DEPLOY_ACTION: ${{ github.event.inputs.deploy_action || 'plan' }}
+
+  # -------------------------------
+  # SMTP settings (明文可接受)
+  # -------------------------------
+  SMTP_HOST: smtp.qq.com
+  SMTP_PORT: 465
+  SMTP_FROM: "XControl Account <manbuzhe2009@qq.com>"
+  SMTP_REPLY_TO: "no-reply@svc.plus"
+  TO_EMAIL: "manbuzhe2009@qq.com"
+
+jobs:
+  # -------------------------------------------------------
+  #  1. Landing Zone Baseline Stage
+  # -------------------------------------------------------
+  landingzone:
+    name: "Deploy LandingZone Baseline"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          export_environment_variables: true
+          create_credentials_file: true
+
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Terraform Init (LandingZone)
+        working-directory: ${{ env.TF_WORKDIR }}/envs/dev-landingzone
+        run: terraform init -upgrade
+
+      - name: Terraform Plan (LandingZone)
+        id: tfplan
+        if: env.DEPLOY_ACTION == 'plan'
+        working-directory: ${{ env.TF_WORKDIR }}/envs/dev-landingzone
+        run: terraform plan -no-color > plan_output.txt
+
+      - name: Upload LandingZone Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: landingzone-plan
+          path: ${{ env.TF_WORKDIR }}/envs/dev-landingzone/plan_output.txt
+
+      - name: Terraform Apply (LandingZone)
+        if: env.DEPLOY_ACTION == 'apply'
+        working-directory: ${{ env.TF_WORKDIR }}/envs/dev-landingzone
+        run: terraform apply -auto-approve
+
+  # -------------------------------------------------------
+  #  2. Validation Stage
+  # -------------------------------------------------------
+  validation:
+    name: "Validate LandingZone Baseline"
+    needs: landingzone
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Validation Checks
+        run: |
+          echo "⚙️ Running LandingZone baseline validation..."
+          chmod +x scripts/validation/validate-landingzone.sh
+          scripts/validation/validate-landingzone.sh \
+            ${{ env.TF_WORKDIR }}/envs/dev-landingzone
+
+  # -------------------------------------------------------
+  #  3. Delivery / Notification Stage
+  # -------------------------------------------------------
+  delivery:
+    name: "Delivery: Notify Rollout"
+    needs: validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Notify
+        env:
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}   # <-- 仅密码从 secret
+          SMTP_USERNAME: "manbuzhe2009@qq.com"
+        run: |
+          echo "📣 Sending LandingZone rollout notification..."
+          chmod +x scripts/notifications/notify-landingzone.sh
+          ./scripts/notifications/notify-landingzone.sh
