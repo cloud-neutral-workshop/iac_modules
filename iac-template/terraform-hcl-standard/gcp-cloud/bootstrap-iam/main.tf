@@ -28,10 +28,20 @@ variable "service_account_roles" {
   ]
 }
 
+resource "google_project_service" "iam" {
+  project = var.project_id
+  service = "iam.googleapis.com"
+
+  # Prevent accidental disablement of a core API when destroying the stack
+  disable_on_destroy = false
+}
+
 resource "google_service_account" "bootstrap" {
   account_id   = var.service_account_id
   display_name = "Terraform Bootstrap"
   project      = var.project_id
+
+  depends_on = [google_project_service.iam]
 }
 
 resource "google_project_iam_member" "bootstrap" {
