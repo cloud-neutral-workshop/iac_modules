@@ -3,8 +3,8 @@ name: IAC Pipeline AWS Cloud (Account/VPC Matrix)
 on:
   push:
     paths:
-      - 'iac-template/terraform-hcl-standard/aws-cloud/envs/dev-vpc/**'
-      - 'iac-template/terraform-hcl-standard/aws-cloud/envs/dev-role/**'
+      - 'iac-template/terraform-hcl-standard/aws-cloud/instance/vpc/**'
+      - 'iac-template/terraform-hcl-standard/aws-cloud/instance/role/**'
       - '.github/workflows/terraform-standard-iac-pipeline-account-matrix.yaml'
   workflow_dispatch:
     inputs:
@@ -14,8 +14,8 @@ on:
         default: 'true'
 
 env:
-  BASE_DIR: iac-template/terraform-hcl-standard/aws-cloud/envs
   AWS_REGION: ap-northeast-1
+  BASE_DIR: iac-template/terraform-hcl-standard/aws-cloud/instance/
   DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
 
 jobs:
@@ -26,9 +26,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        env:
-          - dev-vpc
-          - dev-role
+        component:
+          - vpc
+          - role
 
     steps:
       - uses: actions/checkout@v4
@@ -48,15 +48,15 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Init
-        working-directory: ${{ env.BASE_DIR }}/${{ matrix.env }}
+        working-directory: ${{ env.BASE_DIR }}/${{ matrix.component }}
         run: make init
 
       - name: Plan
-        working-directory: ${{ env.BASE_DIR }}/${{ matrix.env }}
+        working-directory: ${{ env.BASE_DIR }}/${{ matrix.component }}
         run: make plan
 
       - name: Apply
-        working-directory: ${{ env.BASE_DIR }}/${{ matrix.env }}
+        working-directory: ${{ env.BASE_DIR }}/${{ matrix.component }}
         if: ${{ env.DRY_RUN == 'false' }}
         run: make apply
 
@@ -65,7 +65,6 @@ jobs:
         run: echo "Dry run enabled → skip apply step."
 
       - name: Output
-        working-directory: ${{ env.BASE_DIR }}/${{ matrix.env }}
+        working-directory: ${{ env.BASE_DIR }}/${{ matrix.component }}
         if: ${{ env.DRY_RUN == 'false' }}
         run: terraform output -json
-
