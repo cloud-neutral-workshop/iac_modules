@@ -2,7 +2,7 @@
 # IAM Role: Terraform Deploy Role
 # ----------------------------------------
 data "aws_iam_policy_document" "terraform_deploy_assume_role" {
-  source_json = templatefile(
+  override_json = templatefile(
     "${path.module}/policies/terraform-deploy-assume-role.json",
     {
       account_id          = local.account.account_id
@@ -28,7 +28,7 @@ resource "aws_iam_role" "terraform_deploy_role" {
 }
 
 data "aws_iam_policy_document" "terraform_deploy_inline" {
-  source_json = templatefile(
+  override_json = templatefile(
     "${path.module}/policies/terraform-deploy-inline-policy.json",
     {
       account_id  = local.account.account_id
@@ -61,7 +61,7 @@ resource "aws_iam_user" "terraform_user" {
 # IAM User Policy: 最小权限
 # ----------------------------------------
 data "aws_iam_policy_document" "terraform_user" {
-  source_json = templatefile(
+  override_json = templatefile(
     "${path.module}/policies/terraform-user-assume-role.json",
     {
       account_id = local.account.account_id
