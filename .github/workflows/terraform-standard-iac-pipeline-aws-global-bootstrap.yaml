@@ -17,7 +17,7 @@ on:
     inputs:
       deploy_action:
         type: choice
-        options: [plan, apply]
+        options: [plan, apply, destroy]
         default: plan
 
 env:
