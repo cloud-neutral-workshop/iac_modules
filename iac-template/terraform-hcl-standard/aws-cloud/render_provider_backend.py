@@ -13,7 +13,7 @@ CONFIG_DIR = Path(
     os.environ.get("AWS_CLOUD_CONFIG_PATH", PROJECT_ROOT / "aws-cloud" / "config")
 )
 TEMPLATE_DIR = CURRENT_DIR / "templates"
-ENVS_DIR = CURRENT_DIR / "envs"
+ENVS_DIR = CURRENT_DIR / "component"
 
 sys.path.append(str(PROJECT_ROOT / "utils"))
 from config_loader import load_merged_config  # noqa: E402
@@ -81,7 +81,10 @@ def render_templates():
     backend_template = env.get_template("backend.tf.j2")
 
     for module_name, module_config in modules.items():
-        module_dir = ENVS_DIR / module_name
+        module_dir_name = module_config.get("component_dir") or module_name.split("-", 1)[
+            -1
+        ]
+        module_dir = ENVS_DIR / module_dir_name
         if not module_dir.exists():
             print(f"⚠️  Skipping {module_name}: {module_dir} not found")
             continue
