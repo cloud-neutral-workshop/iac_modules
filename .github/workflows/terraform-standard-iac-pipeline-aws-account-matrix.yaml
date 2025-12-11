@@ -1,4 +1,4 @@
-name: IAC Pipeline AWS Cloud (Account/VPC Matrix)
+name: AWS Cloud IAC Pipeline (Account/VPC Matrix)
 
 on:
   push:
