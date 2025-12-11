@@ -3,8 +3,8 @@ name: IAC Pipeline AWS Cloud Resources Matrix
 on:
   push:
     paths:
-      - 'iac-template/terraform-hcl-standard/aws-cloud/envs/dev-object/**'
-      - 'iac-template/terraform-hcl-standard/aws-cloud/envs/dev-ec2/**'
+      - 'iac-template/terraform-hcl-standard/aws-cloud/component/ec2/**'
+      - 'iac-template/terraform-hcl-standard/aws-cloud/component/object/**'
       - '.github/workflows/terraform-standard-iac-pipeline-resources-matrix.yaml'
   workflow_dispatch:
     inputs:
@@ -14,7 +14,7 @@ on:
         default: 'true'
 
 env:
-  BASE_DIR: iac-template/terraform-hcl-standard/aws-cloud/envs
+  BASE_DIR: iac-template/terraform-hcl-standard/aws-cloud/component/
   AWS_REGION: ap-northeast-1
   DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
   AWS_ROLE_ARN: arn:aws:iam::950604983695:role/IacDeployRole
@@ -27,9 +27,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        env:
-          - dev-object
-          - dev-ec2
+        component:
+          - object
+          - ec2
 
     steps:
       - uses: actions/checkout@v4
@@ -52,15 +52,15 @@ jobs:
           role-skip-session-tagging: true
 
       - name: Init
-        working-directory: ${{ env.BASE_DIR }}/${{ matrix.env }}
+        working-directory: ${{ env.BASE_DIR }}/${{ matrix.component }}
         run: make init
 
       - name: Plan
-        working-directory: ${{ env.BASE_DIR }}/${{ matrix.env }}
+        working-directory: ${{ env.BASE_DIR }}/${{ matrix.component }}
         run: make plan
 
       - name: Apply
-        working-directory: ${{ env.BASE_DIR }}/${{ matrix.env }}
+        working-directory: ${{ env.BASE_DIR }}/${{ matrix.component }}
         if: ${{ env.DRY_RUN == 'false' }}
         run: make apply
 
@@ -69,6 +69,6 @@ jobs:
         run: echo "Dry run enabled → skip apply step."
 
       - name: Output
-        working-directory: ${{ env.BASE_DIR }}/${{ matrix.env }}
+        working-directory: ${{ env.BASE_DIR }}/${{ matrix.compoent }}
         if: ${{ env.DRY_RUN == 'false' }}
         run: terraform output -json
