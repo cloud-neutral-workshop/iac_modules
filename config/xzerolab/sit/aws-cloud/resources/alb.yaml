@@ -1,4 +1,4 @@
-name_prefix: "dev-alb"
+name_prefix: "alb"
 
 vpc_id: "vpc-0d0d8d822fa215104"
 
