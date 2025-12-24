@@ -1,4 +1,4 @@
-name: AWS Cloud Account Bootstrap
+name: Multi Cloud Account Bootstrap
 
 concurrency:
   group: terraform-bootstrap-${{ github.ref }}
@@ -8,14 +8,18 @@ on:
   push:
   pull_request:
     paths:
-      - '.github/workflows/iac-pipeline-aws-global-bootstrap.yaml'
-      - 'terraform-hcl-standard/aws-cloud/bootstrap/**'
+      - '.github/workflows/iac-pipeline-mutli-cloud-bootstrap.yaml'
+      - 'terraform-hcl-standard/**'
   workflow_dispatch:
     inputs:
       deploy_action:
         type: choice
         options: [plan, apply, destroy]
         default: plan
+      bootstrap_cloud:
+        description: "Path to bootstrap cloud"
+        type: string
+        default: terraform-hcl-standard/aws-cloud/bootstrap
       gitops_repo_ref:
         description: "GitOps repo ref (branch/tag/sha) to use"
         type: string
@@ -30,12 +34,12 @@ on:
         default: config/xzerolab/sit/aws-cloud/account/bootstrap.yaml
 
 env:
-  TG_ROOT: terraform-hcl-standard/aws-cloud/bootstrap
-  DEPLOY_ACTION: ${{ github.event.inputs.deploy_action || 'plan' }}
   TG_VERSION: 0.67.14
-  GITOPS_REPO_ROOT: gitops
-  GITOPS_BOOTSTRAP_CONFIG: ${{ github.event.inputs.gitops_bootstrap_config || 'config/xzerolab/sit/aws-cloud/account/bootstrap.yaml' }}
-  BOOTSTRAP_CONFIG_PATH: terraform-hcl-standard/aws-cloud/bootstrap/gitops/${{ github.event.inputs.gitops_bootstrap_config || 'config/xzerolab/sit/aws-cloud/account/bootstrap.yaml' }}
+  TG_ROOT: ${{ github.event.inputs.bootstrap_cloud }}
+  GITOPS_REPO: ${{ github.event.inputs.gitops_repo_name }}
+  DEPLOY_ACTION: ${{ github.event.inputs.deploy_action || 'plan' }}
+  BOOTSTRAP_CONFIG_FILE: ${{ github.event.inputs.gitops_bootstrap_config }}
+  BOOTSTRAP_CONFIG_PATH: terraform-hcl-standard/aws-cloud/bootstrap/gitops/${{ github.event.inputs.gitops_bootstrap_config }} 
 
 jobs:
   bootstrap:
@@ -45,20 +49,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Normalize GitOps repo
-        id: gitops_repo
-        shell: bash
-        run: |
-          repo_input="${{ github.event.inputs.gitops_repo_name || 'https://github.com/cloud-neutral-workshop/gitops.git' }}"
-          repo="${repo_input#https://github.com/}"
-          repo="${repo%.git}"
-          echo "repo=$repo" >> "$GITHUB_OUTPUT"
-
       - name: Checkout GitOps config
         uses: actions/checkout@v4
         with:
-          repository: ${{ steps.gitops_repo.outputs.repo }}
-          path: ${{ env.GITOPS_REPO_ROOT }}
+          path: ${{ env.TG_ROOT }}/gitops
+          repository: ${{ env.GITOPS_REPO }}
           ref: ${{ github.event.inputs.gitops_repo_ref || 'main' }}
 
       - name: Document Bootstrap Scope
@@ -90,8 +85,6 @@ jobs:
 
       - name: Force Destroy Bootstrap Resources
         if: env.DEPLOY_ACTION == 'destroy'
-        env:
-          CONFIG_PATH: terraform-hcl-standard/aws-cloud/config/accounts/bootstrap.yaml
         run: |
           ./scripts/aws-bootstrap-force-destroy.sh
 
