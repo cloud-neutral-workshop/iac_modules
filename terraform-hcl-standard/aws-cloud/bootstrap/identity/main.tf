@@ -56,7 +56,7 @@ data "aws_iam_policy_document" "terraform_deploy_assume_role" {
 }
 
 resource "aws_iam_role" "terraform_deploy_role" {
-  count = var.create_role ? 1 : 0
+  count = local.create_role ? 1 : 0
 
   name               = local.role_name
   assume_role_policy = data.aws_iam_policy_document.terraform_deploy_assume_role.json
@@ -87,7 +87,7 @@ data "aws_iam_policy_document" "terraform_deploy_inline" {
 }
 
 resource "aws_iam_role_policy" "terraform_deploy_role_policy" {
-  count = var.create_role ? 1 : 0
+  count = local.create_role ? 1 : 0
 
   name   = "${local.role_name}-bootstrap-minimal"
   role   = aws_iam_role.terraform_deploy_role[0].id
@@ -95,17 +95,17 @@ resource "aws_iam_role_policy" "terraform_deploy_role_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "terraform_deploy_role_managed" {
-  count = var.create_role ? length(var.managed_policy_arns) : 0
+  count = local.create_role ? length(local.managed_policy_arns) : 0
 
   role       = aws_iam_role.terraform_deploy_role[0].name
-  policy_arn = var.managed_policy_arns[count.index]
+  policy_arn = local.managed_policy_arns[count.index]
 }
 
 #
 # IAM User for Terraform (AK/SK)
 # ----------------------------------------
 resource "aws_iam_user" "terraform_user" {
-  count = var.create_user ? 1 : 0
+  count = local.create_user ? 1 : 0
 
   name = local.terraform_user_name
 }
@@ -126,7 +126,7 @@ data "aws_iam_policy_document" "terraform_user" {
 }
 
 resource "aws_iam_user_policy" "terraform_user_policy" {
-  count = var.create_user ? 1 : 0
+  count = local.create_user ? 1 : 0
 
   name   = "${local.terraform_user_name}-iac-policy"
   user   = aws_iam_user.terraform_user[0].name

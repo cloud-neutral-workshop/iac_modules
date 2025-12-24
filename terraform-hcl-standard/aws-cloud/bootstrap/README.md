@@ -21,7 +21,7 @@ Terragrunt `run-all` handles the ordering; no manual sequencing is required.
 
 - **Data plane**: S3 bucket enforces AES256 SSE, public access block, and versioning. DynamoDB enables server-side encryption and PITR for forensic recovery.
 - **Control plane**: IAM policies are externalized in `identity/policies/*.json` and rendered via `aws_iam_policy_document` to keep Terraform code lean and auditable.
-- **Config source of truth**: The GitOps repo (`https://github.com/cloud-neutral-workshop/gitops.git`) stores `config/accounts/bootstrap.yaml`, defining canonical names, regions, and tags. Terragrunt reads it via `GITOPS_REPO_ROOT` (defaults to `../gitops` relative to this repo). Clone that repository locally or set `GITOPS_REPO_ROOT` to your desired path to keep configuration and modules separated. You can also override the config file path with `GITOPS_BOOTSTRAP_CONFIG` (for example, `config/xzerolab/sit/aws-cloud/account/bootstrap.yaml` inside the GitOps repo).
+- **Config source of truth**: Provide the bootstrap YAML path via `TF_CONFIG` (absolute or repo-root relative). When unset, Terragrunt defaults to `gitops/${GITOPS_BOOTSTRAP_CONFIG:-config/bootstrap.yaml}` relative to the repo root inferred from `TG_ROOT` (`terraform-hcl-standard/aws-cloud/bootstrap`).
 
 ## How to Run with Terragrunt
 
@@ -70,3 +70,18 @@ Document the teardown in your change log for auditability.
 - **Idempotent automation**: All configurations are declarative, version-controlled, and runnable via Terragrunt without manual steps.
 - **Auditability**: Policies live in external JSON files; DynamoDB PITR and S3 versioning preserve history for compliance.
 - **Portability**: Inputs are read from YAML configuration and Terragrunt dependencies, making the stack reusable across accounts and regions.
+
+Optional YAML fields supported by the bootstrap modules:
+
+```yaml
+state:
+  create_bucket: true
+iam:
+  create_role: true
+  existing_role_name: null
+  existing_role_arn: null
+  create_user: true
+  existing_user_name: null
+  managed_policy_arns:
+    - arn:aws:iam::aws:policy/AdministratorAccess
+```
