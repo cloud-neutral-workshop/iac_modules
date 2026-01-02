@@ -50,9 +50,20 @@ jobs:
         id: gitops_repo
         shell: bash
         run: |
-          repo_input="${{ github.event.inputs.gitops_repo_name || 'https://github.com/cloud-neutral-workshop/gitops.git' }}"
-          repo="${repo_input#https://github.com/}"
+          repo_input="${{ github.event.inputs.gitops_repo_name }}"
+          if [ -z "$repo_input" ]; then
+            repo_input="https://github.com/cloud-neutral-workshop/gitops.git"
+          fi
+          case "$repo_input" in
+            https://github.com/*) repo="${repo_input#https://github.com/}" ;;
+            git@github.com:*) repo="${repo_input#git@github.com:}" ;;
+            *) repo="$repo_input" ;;
+          esac
           repo="${repo%.git}"
+          if [ -z "$repo" ]; then
+            echo "GitOps repo is empty after normalization." >&2
+            exit 1
+          fi
           echo "repo=$repo" >> "$GITHUB_OUTPUT"
 
       - name: Checkout GitOps config

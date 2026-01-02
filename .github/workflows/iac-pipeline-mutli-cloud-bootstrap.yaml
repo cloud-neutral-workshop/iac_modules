@@ -35,11 +35,11 @@ on:
 
 env:
   TG_VERSION: 0.67.14
-  TG_ROOT: ${{ github.event.inputs.bootstrap_cloud }}
-  GITOPS_REPO: ${{ github.event.inputs.gitops_repo_name }}
+  TG_ROOT: ${{ github.event.inputs.bootstrap_cloud || 'terraform-hcl-standard/aws-cloud/bootstrap' }}
+  GITOPS_REPO: ${{ github.event.inputs.gitops_repo_name || 'https://github.com/cloud-neutral-workshop/gitops.git' }}
   DEPLOY_ACTION: ${{ github.event.inputs.deploy_action || 'plan' }}
-  BOOTSTRAP_CONFIG_FILE: ${{ github.event.inputs.gitops_bootstrap_config }}
-  BOOTSTRAP_CONFIG_PATH: terraform-hcl-standard/aws-cloud/bootstrap/gitops/${{ github.event.inputs.gitops_bootstrap_config }} 
+  BOOTSTRAP_CONFIG_FILE: ${{ github.event.inputs.gitops_bootstrap_config || 'config/xzerolab/sit/aws-cloud/account/bootstrap.yaml' }}
+  BOOTSTRAP_CONFIG_PATH: terraform-hcl-standard/aws-cloud/bootstrap/gitops/${{ github.event.inputs.gitops_bootstrap_config || 'config/xzerolab/sit/aws-cloud/account/bootstrap.yaml' }} 
 
 jobs:
   bootstrap:

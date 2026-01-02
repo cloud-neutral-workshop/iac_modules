@@ -54,3 +54,4 @@ hosts/inventory
 offline-iac/
 offline-setup-*.tar.gz
 
+.env
